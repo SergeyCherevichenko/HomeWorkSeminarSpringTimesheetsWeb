@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/Timesheet/eureka-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Timesheet/eurica-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Timesheet/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Timesheet/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Timesheet/timesheet-page/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Timesheet/timesheet-rest/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Timesheet/untitled/src/main/java" charset="UTF-8" />
+  </component>
+</project>
