@@ -1,4 +1,5 @@
 # spring.application.name=Timesheet
+
 server:
   port: 8080
 spring:
@@ -9,12 +10,23 @@ spring:
     driverClassName: org.h2.Driver
     username: sa
     password: password
-
   jpa:
     show-sql: false
 eureka:
   client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka
-  instance:
-    preferIpAddress: true
+    enabled: false
+application:
+  logging:
+    level: WARN
+    enabled: true
+    printArgs: true
+exception:
+  logging:
+    enabled: true
+    noRecoverFor:
+      - java.lang.NullPointerException
+      - java.lang.IllegalArgumentException
+
+
+
+
