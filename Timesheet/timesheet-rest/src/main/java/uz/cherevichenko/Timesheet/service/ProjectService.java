@@ -22,8 +22,8 @@ public class ProjectService {
 
     @Recover
     public Optional<Project> getById(Long id) {
-throw new RuntimeException("Test");
-        //return projectrepository.findById(id);
+    //throw new RuntimeException("Test"); для проверки recover
+        return projectrepository.findById(id);
     }
 
     public List<Project> getAll() {
