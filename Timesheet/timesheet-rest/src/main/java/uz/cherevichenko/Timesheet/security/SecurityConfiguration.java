@@ -7,20 +7,118 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import uz.cherevichenko.Timesheet.model.Role;
 import uz.cherevichenko.Timesheet.model.RoleName;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
     @Bean
-    SecurityFilterChain noSecurity(HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(it -> it.anyRequest().permitAll()).build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorizeRequests ->
+                        authorizeRequests
+                                .requestMatchers("/timesheets/**").hasAuthority("timesheet") // Изменено на hasAuthority
+                                .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2Login ->
+                        oauth2Login
+                                .defaultSuccessUrl("/home", true)
+                                .failureUrl("/login?error=true")
+                )
+                .oauth2ResourceServer(oAuth2ResourceServerConfigurer ->
+                        oAuth2ResourceServerConfigurer
+                                .jwt(jwtConfigurer -> {
+                                    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+                                    converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+                                        Map<String, List<String>> realmAccess = jwt.getClaim("realm_access");
+                                        List<String> roles = realmAccess != null ? realmAccess.get("roles") : List.of();
+                                        return roles.stream()
+                                                .map(SimpleGrantedAuthority::new) // Убираем ROLE_ префикс
+                                                .collect(Collectors.toList());
+                                    });
+                                    jwtConfigurer.jwtAuthenticationConverter(converter);
+                                })
+                )
+                .build();
     }
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        return JwtDecoders.fromOidcIssuerLocation("http://localhost:8080/realms/master");
+    }
+
+
+}
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        return http
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(authorizeRequests ->
+//                        authorizeRequests
+//                                .requestMatchers("/timesheets/**").hasRole("timesheet")
+//                                .anyRequest().authenticated()
+//                )
+//                .oauth2ResourceServer(oAuth2ResourceServerConfigurer ->
+//                        oAuth2ResourceServerConfigurer
+//                                .jwt(jwtConfigurer -> {
+//                                    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+//                                    converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+//                                        Map<String, List<String>> realmAccess = jwt.getClaim("realm_access");
+//                                        List<String> roles = realmAccess != null ? realmAccess.get("roles") : List.of();
+//                                        return roles.stream()
+//                                                .map(SimpleGrantedAuthority::new)
+//                                                .collect(Collectors.toList());
+//                                    });
+//                                    jwtConfigurer.jwtAuthenticationConverter(converter);
+//                                })
+//                )
+//                .build();
+//    }
+//}
+//    @Bean
+//    SecurityFilterChain noSecurity(HttpSecurity http) throws Exception {
+//        return http
+//        .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(it -> it
+//                        .requestMatchers("/timesheets/**").hasRole("superUser")
+//                        .anyRequest().authenticated()
+//                )
+//                .oauth2ResourceServer(oAuth2ResourceServerConfigurer -> oAuth2ResourceServerConfigurer
+//                        .jwt(jwtConfigurer -> {
+//                            JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+//                            converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+//                               Map<String,List<String>> realmAccess = jwt.getClaim("realm_access");
+//                              List<String> roles = realmAccess.get("roles");
+//                              return roles.stream()
+//                                      .map(SimpleGrantedAuthority::new)
+//                                              .map(it ->(GrantedAuthority) it)
+//                                      .toList();
+//                            });
+//                            jwtConfigurer.jwtAuthenticationConverter(converter);
+//
+//                        })
+//                )
+//               // .oauth2ResourceServer(oAuth2ResourceServerConfigurer ->  {
+//                 //   oAuth2ResourceServerConfigurer.configure(http);
+//                //})
+//                .build();
+//    }
 //    @Bean
 //    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        return http
@@ -80,9 +178,9 @@ public class SecurityConfiguration {
 */
 
 
-    @Bean
-    PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
+//    @Bean
+//    PasswordEncoder passwordEncoder(){
+//        return new BCryptPasswordEncoder();
+//    }
 
-}
+//}

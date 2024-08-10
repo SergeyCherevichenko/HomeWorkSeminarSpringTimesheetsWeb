@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/timesheets")
+@RequestMapping("/timesheets/all")
 @RequiredArgsConstructor
 public class TimesheetPageController {
 
